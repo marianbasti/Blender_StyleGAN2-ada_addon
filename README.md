@@ -21,3 +21,10 @@ Copy `legacy.py` inside `Blender/{Blender.version}/python/lib`
 Copy `dnnlib` folder inside `Blender/{Blender.version}/python/lib/site-packages`
 
 Done!
+
+# Usage (for now)
+Download or train a model (lots of them here https://github.com/justinpinkney/awesome-pretrained-stylegan2)
+Open the .blend
+Run the script, on the 3D View sidebar, a tab named 'StyleGAN' should appear
+Write the path to the downloaded .pkl (should be on the same drive as Blender installation)
+With the object selected, pick a random seed and click on 'Generate Image'
