@@ -3,13 +3,13 @@
 
 # Setup
 In order to install the needed modules, it must be done so for the Blender's inculded python binary
+```
+cd Blender/{Blender.version}/python/bin
 
-`cd Blender/{Blender.version}/python/bin`
+pip ensurepip
 
-`pip ensurepip`
-
-
-`pip install click requests tqdm pyspng ninja imageio-ffmpeg==0.4.3`
+pip install click requests tqdm pyspng ninja imageio-ffmpeg==0.4.3
+```
 
 Also install pytorch following their instructions https://pytorch.org/get-started/locally/
 
@@ -24,7 +24,11 @@ Done!
 
 # Usage (for now)
 Download or train a model (lots of them here https://github.com/justinpinkney/awesome-pretrained-stylegan2)
+
 Open the .blend
+
 Run the script, on the 3D View sidebar, a tab named 'StyleGAN' should appear
+
 Write the path to the downloaded .pkl (should be on the same drive as Blender installation)
+
 With the object selected, pick a random seed and click on 'Generate Image'
