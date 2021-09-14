@@ -13,7 +13,7 @@ In order to install the needed modules, it must be done so for the Blender's inc
 
 Also install pytorch following their instructions https://pytorch.org/get-started/locally/
 
-*Note: if you already have installed some or any of these packages, uninstall them first as they won't be installed inside Blender packages*
+*Note: if you already have installed some or any of these packages, uninstall them first as they won't be installed inside Blender libraries*
 
 
 Download https://github.com/NVlabs/stylegan2-ada-pytorch
