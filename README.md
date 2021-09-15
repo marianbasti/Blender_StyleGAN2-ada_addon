@@ -32,3 +32,14 @@ Run the script, on the 3D View sidebar, a tab named 'StyleGAN' should appear
 Write the path to the downloaded .pkl (should be on the same drive as Blender installation)
 
 With the object selected, pick a random seed and click on 'Generate Image'
+
+
+# Acknowledgements
+```
+@inproceedings{Karras2020ada,
+  title     = {Training Generative Adversarial Networks with Limited Data},
+  author    = {Tero Karras and Miika Aittala and Janne Hellsten and Samuli Laine and Jaakko Lehtinen and Timo Aila},
+  booktitle = {Proc. NeurIPS},
+  year      = {2020}
+}
+```
