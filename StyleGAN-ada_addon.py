@@ -22,6 +22,10 @@ import torch
 import legacy
 
 
+device = torch.device('cuda')
+with dnnlib.util.open_url('C:/pkl/textures.pkl') as f:
+    G = legacy.load_network_pkl(f)['G_ema'].to(device) # type: ignore
+
 def pil_to_image(pil_image, name='texture'):
     '''
     PIL image pixels is 2D array of byte tuple (when mode is 'RGB', 'RGBA') or byte (when mode is 'L')
@@ -33,7 +37,7 @@ def pil_to_image(pil_image, name='texture'):
     byte_to_normalized = 1.0 / 255.0
     # create new image
     bpy_image = bpy.data.images.new(name, width=width, height=height)
-    # convert Image 'L' to 'RGBA', normalize then flatten 
+    # convert Image 'L' to 'RGBA', normalize then flatten
     bpy_image.pixels[:] = (np.asarray(pil_image.convert('RGBA'),dtype=np.float32) * byte_to_normalized).ravel()
 
     return bpy_image
@@ -54,19 +58,18 @@ def num_range(s: str) -> List[int]:
 #----------------------------------------------------------------------------
 def generate_images(network_pkl, seeds, truncation_psi, noise_mode):
     print('Loading networks from "%s"...' % network_pkl)
-    device = torch.device('cuda')
-    with dnnlib.util.open_url(network_pkl) as f:
-        G = legacy.load_network_pkl(f)['G_ema'].to(device) # type: ignore
-        
+    #device = torch.device('cuda')
+    #with dnnlib.util.open_url(network_pkl) as f:
+    #    G = legacy.load_network_pkl(f)['G_ema'].to(device) # type: ignore
+
     #G = torch.load(network_pkl)
-    print('Network is dimension %0d' % G.z_dim)
 
     if seeds is None:
         ctx.fail('--seeds option is required when not using --projected-w')
 
     # Labels.
     label = torch.zeros([1, G.c_dim], device=device)
-    
+
     # Generate images.
     for seed_idx, seed in enumerate(seeds):
         print('Generating image for seed %d (%d/%d) ...' % (seed, seed_idx, len(seeds)))
@@ -74,33 +77,18 @@ def generate_images(network_pkl, seeds, truncation_psi, noise_mode):
         img = G(z, label, truncation_psi=truncation_psi, noise_mode=noise_mode)
         img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
         im = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
-        
+
         mat = bpy.context.view_layer.objects.active.active_material
         image_node = mat.node_tree.nodes["Image Texture"]
         for img in bpy.data.images:
             bpy.data.images.remove(img)
         tex =  pil_to_image(im)
         image_node.image = tex
-        
+
 
 #----------------------------------------------------------------------------
-
-class properties(bpy.types.PropertyGroup):
-    network : bpy.props.StringProperty(name="Network path")
-    seed : bpy.props.IntProperty(name="Seed",default = 33)
-
-
-class stylegan_OT_run(bpy.types.Operator):
-    bl_label = "Generate Image"
-    bl_idname = "stylegan.run"
-    
-    def execute(self,context):
-        props = context.scene.props
-        generate_images(props.network, [props.seed],1,'const')
-        return{'FINISHED'}
-
-
-class MyPanel(Panel):
+#Main Panel
+class PANEL_PT_StyleGAN2(Panel):
     bl_label = 'StyleGAN'
     bl_space_type = 'VIEW_3D'
     bl_region_type= 'UI'
@@ -112,15 +100,59 @@ class MyPanel(Panel):
         props = scene.props
         row = layout.row()
         layout.prop(props, 'network')
+        row = layout.row()
+        row.operator("stylegan.loadnetwork")
         layout.prop(props, 'seed')
-        
         row = layout.row()
         row.operator("stylegan.run")
 
+
+#Properties
+class properties(bpy.types.PropertyGroup):
+    network : StringProperty(description="Load trained model",subtype='FILE_PATH')
+    seed : bpy.props.IntProperty(name="Seed",default = 33)
+
+
+class stylegan_OT_loadNetwork(bpy.types.Operator):
+    bl_label = "Load Network"
+    bl_idname = "stylegan.loadnetwork"
+    bl_parent_id = 'PANEL'
+    bl_space_type = 'VIEW_3D'
+    bl_region_type= 'UI'
+    bl_category= 'StyleGAN'
+
+    def execute(self,context):
+        props = context.scene.props
+        network_pkl = props.network
+        device = torch.device('cuda')
+        print('Loading %s' %network_pkl)
+        global G
+        with dnnlib.util.open_url(network_pkl) as f:
+            G = legacy.load_network_pkl(f)['G_ema'].to(device) # type: ignore
+        print('Success!')
+        return{'FINISHED'}
+
+    def draw(self,context):
+        layout = self.layout
+        row = layout.row()
+        row.label(text="esto si")
+
+# Generate Images operator
+class stylegan_OT_run(bpy.types.Operator):
+    bl_label = "Generate Image"
+    bl_idname = "stylegan.run"
+
+    def execute(self,context):
+        props = context.scene.props
+        generate_images(props.network, [props.seed],1,'const')
+        return{'FINISHED'}
+
+
 classes = (
-    MyPanel,
+    PANEL_PT_StyleGAN2,
     properties,
-    stylegan_OT_run
+    stylegan_OT_run,
+    stylegan_OT_loadNetwork
 )
 
 
@@ -136,7 +168,7 @@ def unregister():
     for cls in reversed(classes):
         unregister_class(cls)
     del bpy.types.Scene.props
-    
+
 if __name__ == '__main__':
     register()
 
