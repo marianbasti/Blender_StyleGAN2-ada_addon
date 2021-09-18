@@ -1,6 +1,10 @@
 # Blender_StyleGAN2-ada_addon
  Implementation of NVLab's StyleGAN2-ada for material creation in Blender
 
+
+https://user-images.githubusercontent.com/31198560/133867325-bd95befb-e25b-472f-8138-3e102dd39c80.mp4
+
+
 # Setup
 In order to install the needed modules, it must be done so for the Blender's inculded python binary
 ```
