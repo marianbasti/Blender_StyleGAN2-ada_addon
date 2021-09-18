@@ -1,10 +1,11 @@
 bl_info = {
-    "name": "StyleGAN",
+    "name": "StyleGAN for Blender",
+    "version": (0, 2),
     "blender": (3, 0, 0),
-    "category": "Object",
+    "location": "View3D > Panel > StyleGAN",
+    "description": "Inference StyleGAN trained models to generate textures",
+    "category": "StyleGAN",
 }
-
-"""Generate images using pretrained network pickle."""
 
 import bpy
 from bpy.types import Panel
@@ -37,7 +38,7 @@ def pil_to_image(pil_image, name='texture'):
     byte_to_normalized = 1.0 / 255.0
     # create new image
     bpy_image = bpy.data.images.new(name, width=width, height=height)
-    # convert Image 'L' to 'RGBA', normalize then flatten
+    # convert Image 'L' to 'RGBA', normalize then flatten 
     bpy_image.pixels[:] = (np.asarray(pil_image.convert('RGBA'),dtype=np.float32) * byte_to_normalized).ravel()
 
     return bpy_image
@@ -56,12 +57,12 @@ def num_range(s: str) -> List[int]:
 
 
 #----------------------------------------------------------------------------
-def generate_images(network_pkl, seeds, truncation_psi, noise_mode):
+def generate_images(network_pkl, seeds, truncation_psi, noise_mode, vector, param):
     print('Loading networks from "%s"...' % network_pkl)
     #device = torch.device('cuda')
     #with dnnlib.util.open_url(network_pkl) as f:
     #    G = legacy.load_network_pkl(f)['G_ema'].to(device) # type: ignore
-
+        
     #G = torch.load(network_pkl)
 
     if seeds is None:
@@ -69,23 +70,27 @@ def generate_images(network_pkl, seeds, truncation_psi, noise_mode):
 
     # Labels.
     label = torch.zeros([1, G.c_dim], device=device)
-
+    
     # Generate images.
     for seed_idx, seed in enumerate(seeds):
         print('Generating image for seed %d (%d/%d) ...' % (seed, seed_idx, len(seeds)))
-        z = torch.from_numpy(np.random.RandomState(seed).randn(1, G.z_dim)).to(device)
+        ndarray[0,vector] = param
+        z = torch.from_numpy(ndarray).to(device)
         img = G(z, label, truncation_psi=truncation_psi, noise_mode=noise_mode)
         img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
         im = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
-
+        
         mat = bpy.context.view_layer.objects.active.active_material
         image_node = mat.node_tree.nodes["Image Texture"]
         for img in bpy.data.images:
             bpy.data.images.remove(img)
         tex =  pil_to_image(im)
         image_node.image = tex
+        
 
-
+def updateNdarray(seed):
+    global ndarray
+    ndarray = np.random.RandomState(seed).randn(1, G.z_dim)
 #----------------------------------------------------------------------------
 #Main Panel
 class PANEL_PT_StyleGAN2(Panel):
@@ -103,16 +108,20 @@ class PANEL_PT_StyleGAN2(Panel):
         row = layout.row()
         row.operator("stylegan.loadnetwork")
         layout.prop(props, 'seed')
+        layout.prop(props, 'vector')
+        layout.prop(props, 'param')
         row = layout.row()
         row.operator("stylegan.run")
 
-
+    
 #Properties
 class properties(bpy.types.PropertyGroup):
     network : StringProperty(description="Load trained model",subtype='FILE_PATH')
     seed : bpy.props.IntProperty(name="Seed",default = 33)
+    vector : bpy.props.IntProperty(name="Vector",default = 0, min=1, max=512)
+    param : bpy.props.FloatProperty(name="Param",default = 0, min=-2, max=2)
 
-
+    
 class stylegan_OT_loadNetwork(bpy.types.Operator):
     bl_label = "Load Network"
     bl_idname = "stylegan.loadnetwork"
@@ -120,7 +129,7 @@ class stylegan_OT_loadNetwork(bpy.types.Operator):
     bl_space_type = 'VIEW_3D'
     bl_region_type= 'UI'
     bl_category= 'StyleGAN'
-
+    
     def execute(self,context):
         props = context.scene.props
         network_pkl = props.network
@@ -132,21 +141,17 @@ class stylegan_OT_loadNetwork(bpy.types.Operator):
         print('Success!')
         return{'FINISHED'}
 
-    def draw(self,context):
-        layout = self.layout
-        row = layout.row()
-        row.label(text="esto si")
-
 # Generate Images operator
 class stylegan_OT_run(bpy.types.Operator):
     bl_label = "Generate Image"
     bl_idname = "stylegan.run"
-
+    
     def execute(self,context):
         props = context.scene.props
-        generate_images(props.network, [props.seed],1,'const')
+        updateNdarray(props.seed)
+        generate_images(props.network, [props.seed],1,'const', props.vector, props.param)
         return{'FINISHED'}
-
+     
 
 classes = (
     PANEL_PT_StyleGAN2,
@@ -168,7 +173,7 @@ def unregister():
     for cls in reversed(classes):
         unregister_class(cls)
     del bpy.types.Scene.props
-
+    
 if __name__ == '__main__':
     register()
 
