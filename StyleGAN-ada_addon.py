@@ -119,7 +119,7 @@ class properties(bpy.types.PropertyGroup):
     network : StringProperty(description="Load trained model",subtype='FILE_PATH')
     seed : bpy.props.IntProperty(name="Seed",default = 33)
     vector : bpy.props.IntProperty(name="Vector",default = 0, min=1, max=512)
-    param : bpy.props.FloatProperty(name="Param",default = 0, min=-2, max=2)
+    param : bpy.props.FloatProperty(name="Value",default = 0, min=-10, max=10)
 
     
 class stylegan_OT_loadNetwork(bpy.types.Operator):
