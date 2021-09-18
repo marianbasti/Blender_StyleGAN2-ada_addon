@@ -35,7 +35,7 @@ Open the .blend
 
 Run the script, on the 3D View sidebar, a tab named 'StyleGAN' should appear
 
-Write the path to the downloaded .pkl (should be on the same drive as Blender installation)
+Pick trained model .pkl (should be on the same drive as Blender installation)
 
 With the object selected, pick a random seed and click on 'Generate Image'
 
