@@ -20,6 +20,8 @@ Download https://github.com/NVlabs/stylegan2-ada-pytorch
 Copy `legacy.py` inside `Blender/{Blender.version}/python/lib`
 Copy `dnnlib` folder inside `Blender/{Blender.version}/python/lib/site-packages`
 
+Put your trained models in `C:\pkl\` (hardcoded for now)
+
 Done!
 
 # Usage (for now)
