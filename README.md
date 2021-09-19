@@ -4,6 +4,9 @@
 
 https://user-images.githubusercontent.com/31198560/133867325-bd95befb-e25b-472f-8138-3e102dd39c80.mp4
 
+https://user-images.githubusercontent.com/31198560/133943020-3d2cdf14-d52f-47f1-946a-ea225afdf3a4.mp4
+
+
 
 # Setup
 In order to install the needed modules, it must be done so for the Blender's inculded python binary
