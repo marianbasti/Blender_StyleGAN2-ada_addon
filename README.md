@@ -39,6 +39,14 @@ Pick trained model .pkl (should be on the same drive as Blender installation)
 
 With the object selected, pick a random seed and click on 'Generate Image'
 
+To animate, simply insert keyframes for the weight value, set render path and click animate (interface will freeze until all frames are rendered. To interrupt press ctrl+c in system console).
+
+
+# TODO
+• Set/animate multiple weights at a time.
+• Fix absolute path on line 27.
+• Render the native way instead of dedicated render button.
+
 
 # Acknowledgements
 ```
