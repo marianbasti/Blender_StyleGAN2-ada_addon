@@ -24,7 +24,7 @@ Download https://github.com/NVlabs/stylegan2-ada-pytorch
 Copy `legacy.py` inside `Blender/{Blender.version}/python/lib`
 Copy `dnnlib` folder inside `Blender/{Blender.version}/python/lib/site-packages`
 
-Put your trained models in `C:\pkl\` (hardcoded for now)
+Put your trained models in `C:\pkl\` (hardcoded for now, change line 27 if needed)
 
 Done!
 
@@ -35,7 +35,7 @@ Open the .blend
 
 Run the script, on the 3D View sidebar, a tab named 'StyleGAN' should appear
 
-Write the path to the downloaded .pkl (should be on the same drive as Blender installation)
+Pick trained model .pkl (should be on the same drive as Blender installation)
 
 With the object selected, pick a random seed and click on 'Generate Image'
 
