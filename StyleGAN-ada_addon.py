@@ -108,20 +108,28 @@ class PANEL_PT_StyleGAN2(Panel):
         row = layout.row()
         row.operator("stylegan.loadnetwork")
         layout.prop(props, 'seed')
+        row = layout.row()
+        layout.prop(props, 'Reseed')
         layout.prop(props, 'vector')
         layout.prop(props, 'param')
         row = layout.row()
         row.operator("stylegan.run")
+        row = layout.row()
+        layout.prop(props, 'renderpath')
+        row = layout.row()
+        row.operator("stylegan.renderanim")
 
     
 #Properties
 class properties(bpy.types.PropertyGroup):
     network : StringProperty(description="Load trained model",subtype='FILE_PATH')
-    seed : bpy.props.IntProperty(name="Seed",default = 33)
-    vector : bpy.props.IntProperty(name="Vector",default = 0, min=1, max=512)
-    param : bpy.props.FloatProperty(name="Value",default = 0, min=-10, max=10)
+    seed : IntProperty(name="Seed",default = 33, min=0)
+    vector : IntProperty(name="Vector",default = 0, min=1, max=512)
+    param : FloatProperty(name="Value",default = 0, min=-10, max=10)
+    renderpath : StringProperty(description="Render path",subtype='DIR_PATH')
+    Reseed : BoolProperty(description="Regenerate weights with seed. Disable to avoid getting weights overwritten", default=True)
 
-    
+#Load .pkl
 class stylegan_OT_loadNetwork(bpy.types.Operator):
     bl_label = "Load Network"
     bl_idname = "stylegan.loadnetwork"
@@ -148,16 +156,44 @@ class stylegan_OT_run(bpy.types.Operator):
     
     def execute(self,context):
         props = context.scene.props
-        updateNdarray(props.seed)
+        if props.Reseed:
+            updateNdarray(props.seed)
         generate_images(props.network, [props.seed],1,'const', props.vector, props.param)
         return{'FINISHED'}
-     
+
+#Render animation with animated parameters
+class stylegan_OT_renderanim(bpy.types.Operator):
+    bl_label = "Render Animation"
+    bl_idname = "stylegan.renderanim"
+    
+    def execute(self,context):
+        s=bpy.context.scene
+        s.render.resolution_x = 1080 # just for my example
+        s.render.resolution_y = 1080
+        props = s.props
+        for i in range(s.frame_start,s.frame_end):
+            s.frame_current = i
+            updateNdarray(props.seed)
+            generate_images(props.network, [props.seed],1,'const', props.vector, props.param)
+
+            s.render.filepath = (
+                                props.renderpath
+                                + str(s.frame_current ).zfill(3)
+                                )
+            bpy.ops.render.render( #{'dict': "override"},
+                                  #'INVOKE_DEFAULT',  
+                                  False,            # undo support
+                                  animation=False, 
+                                  write_still=True
+                                 )
+
 
 classes = (
     PANEL_PT_StyleGAN2,
     properties,
     stylegan_OT_run,
-    stylegan_OT_loadNetwork
+    stylegan_OT_loadNetwork,
+    stylegan_OT_renderanim
 )
 
 
@@ -177,13 +213,4 @@ def unregister():
 if __name__ == '__main__':
     register()
 
-#----------------------------------------------------------------------------
-
-#    generate_images(
-#        "C:/pkl/textures.pkl",
-#        [512514],
-#        1,
-#        "const"
-#    )
-
-#----------------------------------------------------------------------------
+#---------------------------------------------------------------
