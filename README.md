@@ -4,6 +4,9 @@
 
 https://user-images.githubusercontent.com/31198560/133867325-bd95befb-e25b-472f-8138-3e102dd39c80.mp4
 
+https://user-images.githubusercontent.com/31198560/133943020-3d2cdf14-d52f-47f1-946a-ea225afdf3a4.mp4
+
+
 
 # Setup
 In order to install the needed modules, it must be done so for the Blender's inculded python binary
@@ -38,6 +41,18 @@ Run the script, on the 3D View sidebar, a tab named 'StyleGAN' should appear
 Pick trained model .pkl (should be on the same drive as Blender installation)
 
 With the object selected, pick a random seed and click on 'Generate Image'
+
+To animate, simply insert keyframes for the weight value, set render path and click animate (interface will freeze until all frames are rendered. To interrupt press ctrl+c in system console).
+
+
+# TODO
+• Set/animate multiple weights at a time.
+
+• Fix absolute path on line 27.
+
+• Render the native way instead of dedicated render button.
+
+• Generate image sequence for faster re-rendering
 
 
 # Acknowledgements
