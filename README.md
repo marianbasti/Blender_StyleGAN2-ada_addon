@@ -9,13 +9,13 @@ https://user-images.githubusercontent.com/31198560/133943020-3d2cdf14-d52f-47f1-
 
 
 # Setup
-In order to install the needed modules, it must be done so for the Blender's inculded python binary
+In order to install the needed modules, it must be done so for the Blender's included python binary
 ```
 cd Blender/{Blender.version}/python/bin
 
-pip ensurepip
+python.exe -m ensurepip
 
-pip install click requests tqdm pyspng ninja imageio-ffmpeg==0.4.3
+python -m pip install click requests tqdm pyspng ninja imageio-ffmpeg==0.4.3
 ```
 
 Also install pytorch following their instructions https://pytorch.org/get-started/locally/
@@ -46,6 +46,12 @@ With the object selected, pick a random seed and click on 'Generate Image'
 
 To animate, simply insert keyframes for the weight value, set render path and click animate (interface will freeze until all frames are rendered. To interrupt press ctrl+c in system console).
 
+
+(Superresolution WIP) https://github.com/JingyunLiang/SwinIR
+
+install timm
+
+copy lib/models/network_swinir.py
 
 # TODO
 • Set/animate multiple weights at a time.
