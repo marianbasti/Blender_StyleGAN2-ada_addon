@@ -21,9 +21,14 @@ import numpy as np
 import PIL.Image
 import torch
 import legacy
+import glob
 
+import cv2
+from basicsr.archs.rrdbnet_arch import RRDBNet
+from realesrgan import RealESRGANer
 
 device = torch.device('cuda')
+
 with dnnlib.util.open_url('C:/pkl/textures.pkl') as f:
     G = legacy.load_network_pkl(f)['G_ema'].to(device) # type: ignore
 
@@ -57,7 +62,7 @@ def num_range(s: str) -> List[int]:
 
 
 #----------------------------------------------------------------------------
-def generate_images(network_pkl, seeds, truncation_psi, noise_mode, vector, param):
+def generate_images(network_pkl, seeds, truncation_psi, noise_mode, vector, param, sr):
     print('Loading networks from "%s"...' % network_pkl)
     #device = torch.device('cuda')
     #with dnnlib.util.open_url(network_pkl) as f:
@@ -79,14 +84,44 @@ def generate_images(network_pkl, seeds, truncation_psi, noise_mode, vector, para
         img = G(z, label, truncation_psi=truncation_psi, noise_mode=noise_mode)
         img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
         im = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
-        
+
+
+    if sr == True:
+        #RealESRGAN
+        torch.cuda.empty_cache()
+        model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)
+
+        upsampler = RealESRGANer(
+            scale=4,
+            model_path="C:/pkl/RealESRGAN_x4plus.pth",
+            model=model,
+            tile=0,
+            tile_pad=10,
+            pre_pad=0,
+            half=False)
+        im=im.resize([512,512])
+        img = np.array(im)   
+        h, w = img.shape[0:2]
+        try:
+            output, _ = upsampler.enhance(img, outscale=4)
+        except Exception as error:
+            print('Error', error)
+            print('If you encounter CUDA out of memory, try to set --tile with a smaller number.')     
         mat = bpy.context.view_layer.objects.active.active_material
         image_node = mat.node_tree.nodes["Image Texture"]
         for img in bpy.data.images:
             bpy.data.images.remove(img)
-        tex =  pil_to_image(im)
-        image_node.image = tex
-        
+        output = PIL.Image.fromarray(output, 'RGB')
+        output =  pil_to_image(output)
+        image_node.image = output
+    else:
+        mat = bpy.context.view_layer.objects.active.active_material
+        image_node = mat.node_tree.nodes["Image Texture"]
+        for img in bpy.data.images:
+            bpy.data.images.remove(img)
+        output = pil_to_image(im)
+        image_node.image = output
+
 
 def updateNdarray(seed):
     global ndarray
@@ -110,6 +145,8 @@ class PANEL_PT_StyleGAN2(Panel):
         layout.prop(props, 'seed')
         row = layout.row()
         layout.prop(props, 'Reseed')
+        layout.prop(props, 'SuperResolution')
+        row = layout.row()
         layout.prop(props, 'vector')
         layout.prop(props, 'param')
         row = layout.row()
@@ -128,6 +165,7 @@ class properties(bpy.types.PropertyGroup):
     param : FloatProperty(name="Value",default = 0, min=-10, max=10)
     renderpath : StringProperty(description="Render path",subtype='DIR_PATH')
     Reseed : BoolProperty(description="Regenerate weights with seed. Disable to avoid getting weights overwritten", default=True)
+    SuperResolution : BoolProperty(description="Use ESRGAN for x2 image resolution. At least 8gb VRAM needed", default=False)
 
 #Load .pkl
 class stylegan_OT_loadNetwork(bpy.types.Operator):
@@ -158,7 +196,7 @@ class stylegan_OT_run(bpy.types.Operator):
         props = context.scene.props
         if props.Reseed:
             updateNdarray(props.seed)
-        generate_images(props.network, [props.seed],1,'const', props.vector, props.param)
+        generate_images(props.network, [props.seed],1,'const', props.vector, props.param, props.SuperResolution)
         return{'FINISHED'}
 
 #Render animation with animated parameters
@@ -174,7 +212,7 @@ class stylegan_OT_renderanim(bpy.types.Operator):
         for i in range(s.frame_start,s.frame_end):
             s.frame_current = i
             updateNdarray(props.seed)
-            generate_images(props.network, [props.seed],1,'const', props.vector, props.param)
+            generate_images(props.network, [props.seed],1,'const', props.vector, props.param, props.SuperResolution)
 
             s.render.filepath = (
                                 props.renderpath
