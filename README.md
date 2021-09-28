@@ -35,11 +35,16 @@ Done!
 
 
 
-(Superresolution WIP) https://github.com/JingyunLiang/SwinIR
+(Superresolution WIP) https://github.com/xinntao/Real-ESRGAN
 
-install timm
+Download model "RealESRGAN_x4plus.pth" and place in same directory as the other models.
 
-copy lib/models/network_swinir.py
+```
+python -m pip install basicsr, facexlib
+```
+
+Download repo and copy 'realesrgan/' to `Blender/{Blender.version}/python/lib/`. And for some reason I had to delete line 6 in 'realesrgan/__init__.py' for it to work.
+
 
 # Usage (for now)
 Download or train a model (lots of them here https://github.com/justinpinkney/awesome-pretrained-stylegan2)
@@ -57,7 +62,7 @@ To animate, simply insert keyframes for the weight value, set render path and cl
 # TODO
 • Set/animate multiple weights at a time.
 
-• Fix absolute path on line 27.
+• Fix absolute path on line 27 and 96
 
 • Render the native way instead of dedicated render button.
 
