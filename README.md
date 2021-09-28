@@ -33,6 +33,14 @@ Put your trained models in `C:\pkl\` (hardcoded for now, change line 27 if neede
 
 Done!
 
+
+
+(Superresolution WIP) https://github.com/JingyunLiang/SwinIR
+
+install timm
+
+copy lib/models/network_swinir.py
+
 # Usage (for now)
 Download or train a model (lots of them here https://github.com/justinpinkney/awesome-pretrained-stylegan2)
 
@@ -45,13 +53,6 @@ Pick trained model .pkl (should be on the same drive as Blender installation)
 With the object selected, pick a random seed and click on 'Generate Image'
 
 To animate, simply insert keyframes for the weight value, set render path and click animate (interface will freeze until all frames are rendered. To interrupt press ctrl+c in system console).
-
-
-(Superresolution WIP) https://github.com/JingyunLiang/SwinIR
-
-install timm
-
-copy lib/models/network_swinir.py
 
 # TODO
 • Set/animate multiple weights at a time.
