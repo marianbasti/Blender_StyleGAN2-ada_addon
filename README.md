@@ -62,7 +62,7 @@ To animate, simply insert keyframes for the weight value, set render path and cl
 # TODO
 • Set/animate multiple weights at a time.
 
-• Fix absolute path on line 27 and 96
+• Fix absolute path on line 32 and 96
 
 • Render the native way instead of dedicated render button.
 
