@@ -62,7 +62,7 @@ def num_range(s: str) -> List[int]:
 
 
 #----------------------------------------------------------------------------
-def generate_images(network_pkl, seeds, truncation_psi, noise_mode, vector, param, sr):
+def generate_images(network_pkl, seeds, truncation_psi, noise_mode, vector, param, sr, srf):
     print('Loading networks from "%s"...' % network_pkl)
     #device = torch.device('cuda')
     #with dnnlib.util.open_url(network_pkl) as f:
@@ -98,8 +98,10 @@ def generate_images(network_pkl, seeds, truncation_psi, noise_mode, vector, para
             tile=0,
             tile_pad=10,
             pre_pad=0,
-            half=False)
-        im=im.resize([512,512])
+            half=True)
+        
+        if srf == "2":
+            im=im.resize([512,512])
         img = np.array(im)   
         h, w = img.shape[0:2]
         try:
@@ -121,6 +123,7 @@ def generate_images(network_pkl, seeds, truncation_psi, noise_mode, vector, para
             bpy.data.images.remove(img)
         output = pil_to_image(im)
         image_node.image = output
+        torch.cuda.empty_cache()
 
 
 def updateNdarray(seed):
@@ -146,6 +149,7 @@ class PANEL_PT_StyleGAN2(Panel):
         row = layout.row()
         layout.prop(props, 'Reseed')
         layout.prop(props, 'SuperResolution')
+        layout.prop(props, 'SuperResolutionFactor')
         row = layout.row()
         layout.prop(props, 'vector')
         layout.prop(props, 'param')
@@ -165,7 +169,8 @@ class properties(bpy.types.PropertyGroup):
     param : FloatProperty(name="Value",default = 0, min=-10, max=10)
     renderpath : StringProperty(description="Render path",subtype='DIR_PATH')
     Reseed : BoolProperty(description="Regenerate weights with seed. Disable to avoid getting weights overwritten", default=True)
-    SuperResolution : BoolProperty(description="Use ESRGAN for x2 image resolution. At least 8gb VRAM needed", default=False)
+    SuperResolution : BoolProperty(description="Use ESRGAN for image upscale. At least 8gb VRAM needed", default=False)
+    SuperResolutionFactor : EnumProperty(items=[("2","x2","x2"),("4","x4","x4")], name="Upres Factor", description="Upres Factor")
 
 #Load .pkl
 class stylegan_OT_loadNetwork(bpy.types.Operator):
@@ -196,7 +201,7 @@ class stylegan_OT_run(bpy.types.Operator):
         props = context.scene.props
         if props.Reseed:
             updateNdarray(props.seed)
-        generate_images(props.network, [props.seed],1,'const', props.vector, props.param, props.SuperResolution)
+        generate_images(props.network, [props.seed],1,'const', props.vector, props.param, props.SuperResolution, props.SuperResolutionFactor)
         return{'FINISHED'}
 
 #Render animation with animated parameters
@@ -212,7 +217,7 @@ class stylegan_OT_renderanim(bpy.types.Operator):
         for i in range(s.frame_start,s.frame_end):
             s.frame_current = i
             updateNdarray(props.seed)
-            generate_images(props.network, [props.seed],1,'const', props.vector, props.param, props.SuperResolution)
+            generate_images(props.network, [props.seed],1,'const', props.vector, props.param, props.SuperResolution, props.SuperResolutionFactor)
 
             s.render.filepath = (
                                 props.renderpath
