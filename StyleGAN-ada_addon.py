@@ -29,7 +29,9 @@ from realesrgan import RealESRGANer
 
 device = torch.device('cuda')
 
-with dnnlib.util.open_url('C:/pkl/textures.pkl') as f:
+print(os.getcwd())
+
+with dnnlib.util.open_url(os.getcwd() + '/models/textures.pkl') as f:
     G = legacy.load_network_pkl(f)['G_ema'].to(device) # type: ignore
 
 def pil_to_image(pil_image, name='texture'):
@@ -62,7 +64,7 @@ def num_range(s: str) -> List[int]:
 
 
 #----------------------------------------------------------------------------
-def generate_images(network_pkl, seeds, truncation_psi, noise_mode, vector, param, sr, srf):
+def generate_images(network_pkl, seeds, truncation_psi, noise_mode, vector, param, sr, upscaleFactor):
     print('Loading networks from "%s"...' % network_pkl)
     #device = torch.device('cuda')
     #with dnnlib.util.open_url(network_pkl) as f:
@@ -93,14 +95,14 @@ def generate_images(network_pkl, seeds, truncation_psi, noise_mode, vector, para
 
         upsampler = RealESRGANer(
             scale=4,
-            model_path="C:/pkl/RealESRGAN_x4plus.pth",
+            model_path=os.getcwd() + '/models/RealESRGAN_x4plus.pth',
             model=model,
             tile=0,
             tile_pad=10,
             pre_pad=0,
             half=True)
         
-        if srf == "2":
+        if upscaleFactor  == "2":
             im=im.resize([512,512])
         img = np.array(im)   
         h, w = img.shape[0:2]
@@ -169,7 +171,7 @@ class properties(bpy.types.PropertyGroup):
     param : FloatProperty(name="Value",default = 0, min=-10, max=10)
     renderpath : StringProperty(description="Render path",subtype='DIR_PATH')
     Reseed : BoolProperty(description="Regenerate weights with seed. Disable to avoid getting weights overwritten", default=True)
-    SuperResolution : BoolProperty(description="Use ESRGAN for image upscale. At least 8gb VRAM needed", default=False)
+    SuperResolution : BoolProperty(description="Use ESRGAN for image resolution. At least 8gb VRAM needed", default=False)
     SuperResolutionFactor : EnumProperty(items=[("2","x2","x2"),("4","x4","x4")], name="Upres Factor", description="Upres Factor")
 
 #Load .pkl
@@ -223,8 +225,7 @@ class stylegan_OT_renderanim(bpy.types.Operator):
                                 props.renderpath
                                 + str(s.frame_current ).zfill(3)
                                 )
-            bpy.ops.render.render( #{'dict': "override"},
-                                  #'INVOKE_DEFAULT',  
+            bpy.ops.render.render(
                                   False,            # undo support
                                   animation=False, 
                                   write_still=True
@@ -255,5 +256,4 @@ def unregister():
     
 if __name__ == '__main__':
     register()
-
 #---------------------------------------------------------------
