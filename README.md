@@ -31,7 +31,7 @@ Copy `legacy.py` inside `Blender/{Blender.version}/python/lib`
 
 Copy `dnnlib` folder inside `Blender/{Blender.version}/python/lib/site-packages`
 
-Put your trained models in `C:\pkl\` (hardcoded for now, change line 27 if needed)
+Put your trained models inside `Blender Foundation/models`
 
 Done!
 
@@ -63,8 +63,6 @@ To animate, simply insert keyframes for the weight value, set render path and cl
 
 # TODO
 • Set/animate multiple weights at a time.
-
-• Fix absolute path on line 32 and 96
 
 • Render the native way instead of dedicated render button.
 
