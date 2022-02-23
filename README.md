@@ -13,25 +13,25 @@ https://user-images.githubusercontent.com/31198560/135276267-6d149129-6099-4344-
 # Setup
 In order to install the needed modules, it must be done so for the Blender's included python binary
 ```
-cd Blender/{Blender.version}/python/bin
+cd {Blender instalation path}/{Blender version}/python/bin
 
 python.exe -m ensurepip
 
 python -m pip install click requests tqdm pyspng ninja imageio-ffmpeg==0.4.3
 ```
 
-Also install pytorch following their instructions https://pytorch.org/get-started/locally/
+Install pytorch following their instructions https://pytorch.org/get-started/locally/
 
 *Note: if you already have installed some or any of these packages, uninstall them first as they won't be installed inside Blender libraries*
 
 
 Download https://github.com/NVlabs/stylegan2-ada-pytorch
 
-Copy `legacy.py` inside `Blender/{Blender.version}/python/lib`
+Copy `legacy.py` inside `{Blender instalation path}/{Blender.version}/python/lib`
 
-Copy `dnnlib` folder inside `Blender/{Blender.version}/python/lib/site-packages`
+Copy `dnnlib` folder inside `{Blender instalation path}/{Blender.version}/python/lib/site-packages`
 
-Put your trained models in `C:\pkl\` (hardcoded for now, change line 27 if needed)
+Put your trained models inside `Blender Foundation/models`
 
 Done!
 
@@ -45,7 +45,7 @@ Download model "RealESRGAN_x4plus.pth" and place in same directory as the other 
 python -m pip install basicsr, facexlib
 ```
 
-Download repo and copy 'realesrgan/' to `Blender/{Blender.version}/python/lib/`. And for some reason I had to delete line 6 in 'realesrgan/__init__.py' for it to work.
+Download repo and copy 'realesrgan/' to `{Blender instalation path}/{Blender.version}/python/lib/`. And for some reason I had to delete line 6 in 'realesrgan/__ init ___.py' for it to work.
 
 
 # Usage (for now)
@@ -63,8 +63,6 @@ To animate, simply insert keyframes for the weight value, set render path and cl
 
 # TODO
 • Set/animate multiple weights at a time.
-
-• Fix absolute path on line 32 and 96
 
 • Render the native way instead of dedicated render button.
 
